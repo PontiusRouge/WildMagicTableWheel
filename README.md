@@ -1,2 +1,2 @@
-# WildMagicsWheelFrontEnd
-Front end for wild magic roll 
+# WildMagicsWheel
+Wild Magic Roller
