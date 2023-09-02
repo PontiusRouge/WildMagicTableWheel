@@ -90,8 +90,14 @@
             }
 
             function alertPrize(indicatedSegment) {
+
+                let audio = new Audio(indicatedSegment.icon);
+                audio.play();
+
                 alert("You haved rolled: " + indicatedSegment.text + "\n" + indicatedSegment.effect);
                 wheelSpinning = false;
+
+
             }
 
             fetchEffectData();
