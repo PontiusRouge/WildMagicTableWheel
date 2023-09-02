@@ -1,0 +1,100 @@
+<html>
+    <head>
+        <title>HTML5 Canvas Winning Wheel</title>
+        <link rel="stylesheet" href="main.css" type="text/css" />
+        <script type="text/javascript" src="Winwheel.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+    </head>
+    <body>
+        <table cellpadding="0" cellspacing="0" border="0">
+            <tr>
+                <td width="438" height="582" class="the_wheel" align="center" valign="center">
+                    <canvas id="canvas" width="434" height="434"></canvas>
+                    <br />
+                    <img id="spin_button" src="spin_on.png" alt="Spin" onClick="startSpin();" class="clickable" />
+                </td>
+            </tr>
+        </table>
+        <script>
+            let theWheel;
+
+            async function fetchEffectData() {
+                try {
+                    const response = await fetch(`http://127.0.0.1:8000/effects/`);
+                    const data = await response.json();
+
+                    const segmentsData = data.map(item => {
+                        return {
+                            'fillStyle': item.color,
+                            'text': String(item.number),
+                            'effect': item.effect,
+                            'icon': item.icon
+                        };
+                    });
+
+                    initializeWheel(segmentsData);
+                } catch (error) {
+                    console.error("Error fetching the wheel data:", error);
+                }
+            }
+
+            let canvasSize = window.innerWidth * 0.75; 
+            if(window.innerHeight < window.innerWidth){
+                canvasSize = window.innerHeight * 0.75;
+            }
+
+            document.getElementById('canvas').width = canvasSize;
+            document.getElementById('canvas').height = canvasSize;
+
+            function initializeWheel(segmentsData) {
+                theWheel = new Winwheel({
+                    'outerRadius': canvasSize / 2 - 10,
+                    'innerRadius': 75,
+                    'textFontSize': 24,
+                    'textOrientation': 'vertical',
+                    'textAlignment': 'outer',
+                    'numSegments': segmentsData.length,
+                    'segments': segmentsData,
+                    'animation': {
+                        'type': 'spinToStop',
+                        'duration': 5,
+                        'spins': 10,
+                        'callbackFinished': alertPrize,
+                        'callbackSound': playSound,
+                        'soundTrigger': 'pin'
+                    },
+                    'pins': {
+                        'number': 24,
+                        'fillStyle': 'silver',
+                        'outerRadius': 4,
+                    }
+                });
+            }
+
+            let audio = new Audio('tick.mp3');
+
+            function playSound() {
+                audio.pause();
+                audio.currentTime = 0;
+                audio.play();
+            }
+
+            let wheelSpinning = false;
+
+            function startSpin() {
+                if (!wheelSpinning) {
+                    theWheel.rotationAngle = 0; // Reset the rotation angle before each spin
+                    theWheel.startAnimation();
+                    wheelSpinning = true;
+                }
+            }
+
+            function alertPrize(indicatedSegment) {
+                alert("You haved rolled: " + indicatedSegment.text + "\n" + indicatedSegment.effect);
+                wheelSpinning = false;
+            }
+
+            fetchEffectData();
+        </script>
+    </body>
+</html>
